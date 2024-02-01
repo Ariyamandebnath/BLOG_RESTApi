@@ -5,11 +5,12 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev":"nodemon -r dotenv/config --experimental-json-modules src/index.js"
+    "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js"
   },
   "author": "Ariyaman Debnath",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "d": "^1.0.1",
     "dotenv": "^16.4.1",
     "express": "^4.18.2",
