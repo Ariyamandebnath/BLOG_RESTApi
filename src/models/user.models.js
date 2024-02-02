@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcryptjs from 'bcryptjs';
+import jwt from 'jsonwebtoken';;
 
 const userSchema = new mongoose.Schema({
 
@@ -28,7 +29,10 @@ const userSchema = new mongoose.Schema({
     }],
     tags:[{
         
-    }]
+    }],
+    refreshTokens:{
+        type:String
+    }
 
 },{timestamps: true});
 //this is a pre-save hook!! This will be executed before the saving a document to the MongoDB database.
@@ -53,5 +57,35 @@ userSchema.methods.isPasswordCorrect = async function(password){
     return await bcryptjs.compare(password, this.password);
 }
 
+
+userSchema.methods.generateAccessToken = async function(){
+    return jwt.sign(
+        {
+            _id : this._id,
+            email: this.email,
+            username: this.username,
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn: process.env.ACCESS_TOKEN_Expiry
+        }
+    )
+}
+
+userSchema.methods.generateRefreshToken = async function(){
+    return jwt.sign(
+        {
+            _id : this._id,
+           
+        },
+        process.env.REFERESH_TOKEN_SECRET,
+        {
+            expiresIn: process.env.REFERESH_TOKEN_EXPIRY
+        }
+    )
+}
+
+userSchema.methods.generateRefreshToken = async function(){
+}
 
 export const User = mongoose.model('User',userSchema)
