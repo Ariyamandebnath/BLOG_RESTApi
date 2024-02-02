@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcryptjs from 'bcryptjs';
+import { Post } from './post.models';
 
 const userSchema = new mongoose.Schema({
 
@@ -16,9 +17,21 @@ const userSchema = new mongoose.Schema({
     password:{
         type: String,
         required: true
+    },
+    posts:[{
+        type: mongoose.Schema.ObjectId,
+        ref: Post
     }
-});
+    ],
+    comments:[{
+        type: mongoose.Schema.ObjectId,
+        ref: Comment
+    }],
+    tags:[{
+        
+    }]
 
+},{timestamps: true});
 //this is a pre-save hook!! This will be executed before the saving a document to the MongoDB database.
 
 userSchema.pre("save", async function(next){
