@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { User } from './user.models';
 
 const postSchema = new mongoose.Schema({
     titel:{
@@ -13,7 +12,7 @@ const postSchema = new mongoose.Schema({
     },
     author:{
         type:mongoose.Schema.Types.ObjectId,
-        ref: User,
+        ref: 'User',
         required: true
     },
 },{

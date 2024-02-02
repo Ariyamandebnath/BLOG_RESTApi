@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import bcryptjs from 'bcryptjs';
-import { Post } from './post.models';
 
 const userSchema = new mongoose.Schema({
 
@@ -20,7 +19,7 @@ const userSchema = new mongoose.Schema({
     },
     posts:[{
         type: mongoose.Schema.ObjectId,
-        ref: Post
+        ref: 'Post'
     }
     ],
     comments:[{
