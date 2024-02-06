@@ -25,9 +25,11 @@ const userSchema = new mongoose.Schema({
     ],
     comments:[{
         type: mongoose.Schema.ObjectId,
-        ref: Comment
+        ref: 'Comment'
     }],
     tags:[{
+        ref: mongoose.Schema.ObjectId,
+        ref:'Tag'
         
     }],
     refreshTokens:{
