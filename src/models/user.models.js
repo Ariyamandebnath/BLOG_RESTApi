@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import bcryptjs from 'bcryptjs';
-import jwt from 'jsonwebtoken';;
+import jwt from 'jsonwebtoken';
 
 const userSchema = new mongoose.Schema({
 
@@ -28,10 +28,13 @@ const userSchema = new mongoose.Schema({
         ref: 'Comment'
     }],
     tags:[{
-        ref: mongoose.Schema.ObjectId,
+        type: mongoose.Schema.ObjectId,
         ref:'Tag'
         
     }],
+    profilePicture:{
+        type: String, //cloudinary url
+    },
     refreshTokens:{
         type:String
     }
