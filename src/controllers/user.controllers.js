@@ -11,11 +11,7 @@ const registerUser = asyncHandler(async (req,res)=>{
 
     //get user detail from the frontend
 
-    const {
-        username,
-        email,
-        password
-    } = req.body
+    const { username, email, password} = req.body
 
     
     //validation -not empty
@@ -27,7 +23,7 @@ const registerUser = asyncHandler(async (req,res)=>{
     }
 
     //check if user already exits: username, email
-    const existedUser = User.findOne({
+    const existedUser = await User.findOne({
         $or:[{username}, {email}]
     })
     if(existedUser){
@@ -40,7 +36,7 @@ const registerUser = asyncHandler(async (req,res)=>{
 
     //check if profilePicture is uploaded to temporary storage sucessfully
     if(!profilePictureLocalpath){
-        console.log("Upload profilePicture")
+        throw new ApiError(400, "Profile Picture  is required")
 
     }
 
@@ -48,15 +44,26 @@ const registerUser = asyncHandler(async (req,res)=>{
     // upload profile picture from local storage to cloudinary 
     const profilePicture =await uploadOnClodinary(profilePictureLocalpath)
 
+    if (!profilePicture){
+        throw new ApiError(400, "Profile Picture is required")
+    }
+
 
     //create user object - create entry in db
 
-    const user = await User.create({
+    const newUser = new User({
         username: username.toLowerCase(),
         email,
         password,
         profilePicture: profilePicture?.url || ""
-    })
+    });
+    
+    try {
+        await newUser.save();
+        console.log('User created successfully:', newUser);
+    } catch (error) {
+        console.error('Error creating user:', error.message);
+    }
 
     //remove password and reference token field from response
 
@@ -76,8 +83,8 @@ const registerUser = asyncHandler(async (req,res)=>{
 
 
 
-    
+
 
 })
 
-export {registerUser}
+export { registerUser };
