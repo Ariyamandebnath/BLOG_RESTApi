@@ -34,7 +34,6 @@ const userSchema = new mongoose.Schema({
     }],
     profilePicture:{
         type: String, //cloudinary url
-        required: true
     },
     refreshTokens:{
         type:String
