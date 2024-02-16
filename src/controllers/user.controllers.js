@@ -1,27 +1,30 @@
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/ApiErrors.js";
 import { User } from "../models/user.models.js";
-import { uploadOnClodinary } from "../utils/cloudinary.js";
+import {uploadOnClodinary} from "../utils/cloudinary.js";
 import ApiResponse from "../utils/ApiResponse.js";
 
 const registerUser = asyncHandler(async (req, res) => {
-    try {
+    try{
         // Get user details from the frontend
         const { username, email, password } = req.body;
 
         // Validation - not empty
-        if (![username, email, password].every((field) => field && field.trim() !== "")) {
+        if (
+            [username, email, password].some((field) => field?.trim() === "")
+            ) {
             throw new ApiError(400, "All fields are compulsory");
         }
 
         // Check if user already exists: username, email
-        const existingUser = await User.findOne({ $or: [{ username }, { email }] });
-        if (existingUser) {
+        const existedUser = await User.findOne({ $or: [{ username }, { email }] });
+        
+        if (existedUser) {
             throw new ApiError(409, "User with email or username already exists");
         }
 
         // Upload profile picture to temporary storage
-        const profilePictureLocalPath = req.files?.profilePicture?.[0]?.path;
+        const profilePictureLocalPath = req.files?.profilePicture[0]?.path;
 
         // Check if profile picture is uploaded to temporary storage successfully
         if (!profilePictureLocalPath) {
@@ -41,27 +44,25 @@ const registerUser = asyncHandler(async (req, res) => {
             email,
             password,
             profilePicture: profilePicture?.url || "",
-        });
+        }).maxTimeMS(20000);
 
         // Save user to the database
-        const savedUser = await newUser.save();
+        const savedUser= await newUser.save();
 
-        // Remove sensitive fields from the response
-        const responseUser = savedUser.toObject();
-        delete responseUser.password;
-        delete responseUser.refreshTokens;
+        // Remove password and reference token field from response
+        const createdUser = await User.findById(savedUser._id).select("-password -refreshToken");
+
+        // Check if the user is created successfully
+        if (!createdUser) {
+            throw new ApiError(500, "Something went wrong when registering User");
+        }
 
         // Return success response to the client
-        return res.status(201).json(new ApiResponse(200, responseUser, "User created successfully"));
+        return res.status(201).json(new ApiResponse(200, createdUser, "User created successfully"));
     } catch (error) {
         console.error('Error during user registration:', error);
-
-        // Check if it's an instance of ApiError, if not, consider it as a server error
-        const statusCode = error instanceof ApiError ? error.statusCode : 500;
-        const errorMessage = error instanceof ApiError ? error.message : "Something went wrong when registering User";
-
         // Return error response to the client
-        return res.status(statusCode).json({ success: false, message: errorMessage });
+        return res.status(error.statusCode || 500).json({ success: false, message: error.message });
     }
 });
 
