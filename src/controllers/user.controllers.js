@@ -294,6 +294,74 @@ const updateprofilePicture =asyncHandler(async(req, res)=>{
 })
 
 
+const getAuthorProfile = asyncHandler( async(req,res)=>{
+    const {username} =req.params
+
+    if(!username?.trim()){
+        throw new ApiError(400,"username is missing")
+    }
+
+    const author =await User.aggregate([
+        {
+            $match:{
+                username:username?.toLowerCase()
+            }
+        },
+        {
+            $lookup:{
+                from:"Subscription",
+                localField: "_id",
+                foreignField: "Author",
+                as: "subscribers"
+            }
+        },
+        {
+            $lookup:{
+                from:"Subscription",
+                localField: "_id",
+                foreignField: "subcriber",
+                as: "subscribedTo"
+            }
+        },
+        {
+            $addFields:{
+                subscribersCount:{
+                    $size:"$subscribers"
+                },
+                AuthorSubscribedToCount:{
+                    size:"$subscribedTo"
+                },
+                isSubscribed:{
+                    $cond:{
+                        if:{$in:[req.user?._id,"$subscribers.subscriber"]},
+                        then: true,
+                        else:false
+                    }
+                }
+            }
+        },
+        {
+            $project:{
+                username:1,
+                subscribersCount:1,
+                AuthorSubscribedToCount:1,
+                profilePicture:1,
+                email:1,
+            
+            }
+        }
+    ])
+    if(!author?.length){
+        throw new ApiError(404,"Author does not exists")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,channel[0],"User channel fetched successfully")
+    )
+})
+
 
 
 export { 
@@ -304,7 +372,8 @@ export {
     changeCurrentPassword,
     getCurrentUser,
     updateprofilePicture,
-    updateUserDetails
+    updateUserDetails,
+    getAuthorProfile
 
 
 };
