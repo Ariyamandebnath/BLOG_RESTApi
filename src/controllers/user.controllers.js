@@ -267,6 +267,35 @@ const updateUserDetails = asyncHandler(async(req,res)=>{
 )
 
 
+const updateprofilePicture =asyncHandler(async(req, res)=>{
+    const profilePictureLocalPath =req.file?.path
+
+    if(!profilePictureLocalPath){
+        throw new ApiError(400, "Profile picture is missing")
+    }
+
+    const profilePicture = await uploadOnClodinary(profilePictureLocalPath)
+
+    if(!profilePicture.url){
+        throw new ApiError(400, "Error while uploading profile picture")
+    }
+
+    await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set:{
+                profilePicture:profilePicture.url
+            }
+        },
+        {
+            new:true
+        }
+    ).select("-password")
+})
+
+
+
+
 export { 
     registerUser,
     loginUser,
