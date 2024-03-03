@@ -10,12 +10,7 @@ const commentSchema= new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    post:{
-        type: String,
-        ref: 'Post',
-        required: true
 
-    }
 }, {timestamps: true});
 
 export const Comment = mongoose.model('Comment',commentSchema)
