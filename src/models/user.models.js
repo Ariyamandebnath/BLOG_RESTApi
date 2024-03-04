@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema({
     },
     refreshTokens:{
         type:String
+    },
+    isAdmin:{
+        type:Boolean,
+        default:false
     }
 
 },{timestamps: true});
