@@ -4,24 +4,8 @@ import { User } from "../models/user.models.js";
 import {uploadOnClodinary} from "../utils/cloudinary.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
-import { response } from "express";
+import { generateAccessAndRefreshTokens } from "../middlewares/auth.middleware.js";
 
-const generateAccessAndRefreshTokens = async(userId)=>{
-    try {
-       const user= await User.findById(userId)
-       const accessToken = user.generateAccessToken()
-       const refreshToken = user.generateRefreshToken()
-
-       user.refreshToken = refreshToken
-       await user.save({validateBeforeSave: false})
-
-       return {accessToken, refreshToken}
-
-    } catch (error) {
-        throw new ApiError(500, "Something went wrong while generating refresh and access token")
-        
-    }
-}
 
 const registerUser = asyncHandler(async (req, res) => {
     try{
@@ -32,12 +16,35 @@ const registerUser = asyncHandler(async (req, res) => {
          if (![username, email, password].every((field) => field && field.trim() !== "")) {
              throw new ApiError(400, "All fields are compulsory");
          }
- 
+
+         
          // Check if user already exists: username, email
          const existingUser = await User.findOne({ $or: [{ username }, { email }] });
          if (existingUser) {
              throw new ApiError(409, "User with email or username already exists");
          }
+         //if user doesnot exist then check
+
+         //check password length
+         if(password){
+            if(password.length<6){
+                throw new ApiError(400,"Password must be at least 6 characters");
+            }
+         }
+         //check username
+         if(username){
+            if(username.length<=7 || username.length>=20){
+                throw new ApiError(400,"Username must be at least 7 characters and maximum 20 charactrs")
+            }
+            if(username!==username.toLowerCase()){
+                throw new ApiError(400,"Username must be lowercase")
+
+            }
+            if(username.match(/^[a-zA-Z0-9]+$/)){
+                throw new ApiError(400,"Username can contain letters and numbers only")
+            }
+         }
+ 
  
          // Upload profile picture to temporary storage
          const profilePictureLocalPath = req.files?.profilePicture?.[0]?.path;
@@ -88,7 +95,7 @@ const loginUser =asyncHandler(async (req,res)=>{
     const {email,username, password} = req.body;
     //username or email
     if(!email && !username){
-        throw new ApiError(400,"username or email is required");
+        throw new ApiError(400,"username and email are required");
 
     }
     //find the user
@@ -107,10 +114,12 @@ const loginUser =asyncHandler(async (req,res)=>{
         throw new ApiError(401,"Invalid User Credentials");
     }
 
-    //Got refresh token and access token
+    //Get refresh token and access token
 
     const {accessToken,refreshToken} =await generateAccessAndRefreshTokens(user._id)
 
+
+    //login the User
 
     const loggedinUser = await User.findById(user._id).select("-password -refreshToken")
 
@@ -119,14 +128,14 @@ const loginUser =asyncHandler(async (req,res)=>{
         httpOnly: true,
         secure: true
     }
+
+    
     return res
     .status(200)
     .cookie("accessToken",accessToken,options)
     .cookie("refreshToken", refreshToken, options)
     .json(
-
         new ApiResponse(
-
             200,
             {
                 user:loggedinUser, accessToken, refreshToken
@@ -138,6 +147,8 @@ const loginUser =asyncHandler(async (req,res)=>{
     )
 
 })
+
+
 
 const logoutUser = asyncHandler(async(req, res) => {
     await User.findByIdAndUpdate(
