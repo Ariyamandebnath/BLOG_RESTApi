@@ -252,13 +252,14 @@ const getCurrentUser =asyncHandler(async(req, res)=>{
 })
 
 const updateUserDetails = asyncHandler(async(req,res)=>{
-    const {username, email}= req.body
+    const {username, email,password}= req.body
 
-    if(!username||!email){
+    if(!username||!email ||!!password){
         throw new ApiError(400,"All fields are required")
     }
+   
 
-    const user =User.findByIdAndUpdate(    
+    const user = await User.findByIdAndUpdate(    
         req.user?._id,
         {
             $set:{
@@ -302,6 +303,10 @@ const updateprofilePicture =asyncHandler(async(req, res)=>{
             new:true
         }
     ).select("-password")
+
+    return res
+    .status(200)
+    .json("user has successfully updated profile picture")
 })
 
 
@@ -373,6 +378,22 @@ const getAuthorProfile = asyncHandler( async(req,res)=>{
     )
 })
 
+const deleteUser =asyncHandler(async (req,res,next)=>{
+    
+    const {email, username, password}= req.body;
+
+    if(!email || !username || !password){
+        throw new ApiError(400,"you donot have permission to delete")
+    }
+
+    const user = await User.findOne({
+        $or: [{username}, {email}]
+    })
+    await User.findByIdAndDelete(user._id)
+    res.status(200).json("User has been deleted")
+
+}
+)
 
 
 export { 
@@ -384,7 +405,8 @@ export {
     getCurrentUser,
     updateprofilePicture,
     updateUserDetails,
-    getAuthorProfile
+    getAuthorProfile,
+    deleteUser
 
 
 };
