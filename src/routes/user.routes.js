@@ -28,16 +28,14 @@ router.route("/register").post(
 router.route("/login").post(loginUser)
 
 
-//secured routes
-router.route("/logout").post(verifyJWT,logoutUser)
-router.route("/refresh-token").post(refreshAccessToken)
-router.route("/change-password").put(changeCurrentPassword)
-router.route("/refresh-token").post(refreshAccessToken)
-router.route("/current-user").get(getCurrentUser)
-router.route("/change-profile-picture").post(updateprofilePicture)
-router.route("/authon-0").get(getAuthorProfile)
-router.route("/delete-user").delete(verifyJWT,deleteUser)
-router.route("/update-user-credentials").put(verifyJWT,updateUserDetails)
+// Secured routes
+router.route("/logout").post(verifyJWT, logoutUser);
+router.route("/refresh-token").post(refreshAccessToken);
+router.route("/change-password").post(verifyJWT, changeCurrentPassword); // Updated HTTP method
+router.route("/current-user").get(verifyJWT, getCurrentUser);
+router.route("/change-profile-picture").post(verifyJWT, updateprofilePicture);
+router.route("/author-profile").get(getAuthorProfile); // Updated route name
+router.route("/delete-user").delete(verifyJWT, deleteUser);
+router.route("/update-user-credentials").put(verifyJWT, updateUserDetails);
 
-
-export default router
+export default router;
