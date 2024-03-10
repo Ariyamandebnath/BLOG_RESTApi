@@ -68,12 +68,44 @@ const getPosts = asyncHandler(async (req, res, next) => {
       lastMonthPosts,
     });
   });
-  
+
+const deletePosts =asyncHandler(async(req, res, next)=>{
+    if(!req.user.isAdmin){
+        throw new ApiError(403,"You  are not allowed to delte this post")
+    }
+    await Post.findByIdaAndDelete(Post._id)
+    res.status(200).json('The post has been deleted')
+})
+
+
+const updatePost = asyncHandler(async(req, res, next)=>{
+    if(!req.user.isAdmin){
+        throw new ApiError(403, " you are not allowed to update this post");
+
+    }
+    Post.findByIdaAndUpdate(
+        req.params.postId,
+        {
+            $set: {
+                title: req.body.title,
+                content: req.body.content,
+                category: req.body.category,
+                image: req.body.image,
+              },
+        },
+        {new:true}
+    )
+
+    res.status(200).json(updatedPost)
+
+})
 
 
 export {
 
     createPosts,
-    getPosts
+    getPosts,
+    deletePosts,
+    updatePost
 
 }
