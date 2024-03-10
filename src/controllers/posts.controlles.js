@@ -69,21 +69,22 @@ const getPosts = asyncHandler(async (req, res, next) => {
     });
   });
 
-const deletePosts =asyncHandler(async(req, res, next)=>{
-    if(!req.user.isAdmin){
-        throw new ApiError(403,"You  are not allowed to delte this post")
+const deletePosts = asyncHandler(async (req, res, next) => {
+    if (!req.user.isAdmin) {
+        throw new ApiError(403, "You are not allowed to delete this post");
     }
-    await Post.findByIdaAndDelete(Post._id)
-    res.status(200).json('The post has been deleted')
-})
+    await Post.findByIdAndDelete(req.params.postId);
+    res.status(200).json('The post has been deleted');
+});
 
 
-const updatePost = asyncHandler(async(req, res, next)=>{
-    if(!req.user.isAdmin){
-        throw new ApiError(403, " you are not allowed to update this post");
 
+const updatePost = asyncHandler(async (req, res, next) => {
+    if (!req.user.isAdmin) {
+        throw new ApiError(403, "You are not allowed to update this post");
     }
-    Post.findByIdaAndUpdate(
+
+    const updatedPost = await Post.findByIdAndUpdate(
         req.params.postId,
         {
             $set: {
@@ -91,14 +92,13 @@ const updatePost = asyncHandler(async(req, res, next)=>{
                 content: req.body.content,
                 category: req.body.category,
                 image: req.body.image,
-              },
+            },
         },
-        {new:true}
-    )
+        { new: true }
+    );
 
-    res.status(200).json(updatedPost)
-
-})
+    res.status(200).json(updatedPost);
+});
 
 
 export {
