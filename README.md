@@ -81,7 +81,7 @@ Login an existing user.
   "message": "User logged in successfully"
   }
 
-##Delete User
+## Delete User
 
 **Endpoint:** DELETE /api/users/delete-user
 
