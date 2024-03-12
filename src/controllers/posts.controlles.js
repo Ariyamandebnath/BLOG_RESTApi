@@ -1,7 +1,7 @@
-import { uploadOnClodinary } from "../utils/cloudinary";
-import Post from "../models/post.models"
-import ApiResponse from "../utils/ApiResponse";
-import asyncHandler from "../utils/asyncHandler";
+import { uploadOnClodinary } from "../utils/cloudinary.js";
+import {Post} from "../models/post.models.js"
+import ApiResponse from "../utils/ApiResponse.js";
+import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/ApiErrors.js";
 
 const createPosts = asyncHandler(async (req,res,next)=>{

@@ -23,11 +23,13 @@ app.use(cookieParser());
 
 //routes import
 import userRouter from './routes/user.routes.js'
-
-
-
+import postRoutes from './routes/post.routes.js'
+import commentRoutes from './routes/comments.routes.js';
 //routes declaration
 app.use("/api/v1/users",userRouter)
+app.use("/api/v1/post",postRoutes)
+app.use("/api/v1/comment",commentRoutes)
+
 
 
 export default app;
